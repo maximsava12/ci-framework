@@ -1,0 +1,24 @@
+name: Sync upstream branches
+
+on:
+  workflow_dispatch:
+    inputs:
+      source-branch:
+        description: 'Source branch'
+        required: true
+        default: main
+        type: string
+      target-branch:
+        description: 'Target branch'
+        required: true
+        default: main
+        type: string
+
+jobs:
+  sync:
+    uses: openstack-k8s-operators/ci-framework/.github/workflows/sync_branches_reusable_workflow.yml@main
+    with:
+      source-branch: ${{ inputs.source-branch }}
+      target-branch: ${{ inputs.target-branch }}
+    secrets:
+      ssh-key: ${{ secrets.DEPLOY_KEY }}
