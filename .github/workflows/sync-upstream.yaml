@@ -1,25 +1,29 @@
-name: Sync upstream branches
+name: Sync Fork with Upstream
 
 on:
+  schedule:
+    - cron: '0 * * * *'
   workflow_dispatch:
-    inputs:
-      source-branch:
-        description: 'Upstream source branch'
-        required: true
-        default: main
-        type: string
-      target-branch:
-        description: 'Fork target branch'
-        required: true
-        default: main
-        type: string
+
+permissions:
+  contents: write
 
 jobs:
   sync:
-    uses: openstack-k8s-operators/ci-framework/.github/workflows/sync_branches_reusable_workflow.yml@main
-    with:
-      source-repository: UPSTREAM_OWNER/s2i-openstack-containers
-      source-branch: ${{ inputs.source-branch }}
-      target-branch: ${{ inputs.target-branch }}
-    secrets:
-      ssh-key: ${{ secrets.DEPLOY_KEY }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout fork
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: main
+
+      - name: Sync upstream
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git remote add upstream https://github.com/openstack-k8s-operators/glance-operator.git
+          git fetch upstream main
+          git merge upstream/main
+          git push origin main
